@@ -1,0 +1,25 @@
+{
+  "kind": "sequence",
+  "title": "下单请求的调用链",
+  "participants": [
+    { "id": "u", "label": "用户" },
+    { "id": "gw", "label": "API 网关" },
+    { "id": "order", "label": "订单服务" },
+    { "id": "pg", "label": "PostgreSQL" },
+    { "id": "mq", "label": "消息队列" }
+  ],
+  "messages": [
+    { "from": "u", "to": "gw", "label": "POST /orders" },
+    { "from": "gw", "to": "order", "label": "createOrder()" },
+    { "from": "order", "to": "pg", "label": "BEGIN" },
+    { "from": "order", "to": "pg", "label": "INSERT orders" },
+    { "from": "pg", "to": "order", "label": "ok", "kind": "return" },
+    { "from": "order", "to": "pg", "label": "COMMIT" },
+    { "from": "order", "to": "mq", "label": "发布 OrderCreated" },
+    { "from": "order", "to": "gw", "label": "201 Created", "kind": "return" },
+    { "from": "gw", "to": "u", "label": "201 Created", "kind": "return" }
+  ],
+  "blocks": [
+    { "kind": "opt", "from": 2, "to": 5, "label": "事务" }
+  ]
+}

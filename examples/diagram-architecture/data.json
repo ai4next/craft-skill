@@ -1,0 +1,163 @@
+{
+  "kind": "architecture",
+  "direction": "LR",
+  "title": "订单系统的运行时架构",
+  "groups": [
+    {
+      "id": "edge",
+      "label": "边缘"
+    },
+    {
+      "id": "core",
+      "label": "核心服务"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "client",
+      "label": "客户端",
+      "sublabel": "Web / 移动端",
+      "kind": "external"
+    },
+    {
+      "id": "cdn",
+      "label": "CDN",
+      "kind": "cloud",
+      "group": "edge"
+    },
+    {
+      "id": "gateway",
+      "label": "API 网关",
+      "kind": "frontend",
+      "group": "edge"
+    },
+    {
+      "id": "auth",
+      "label": "认证服务",
+      "kind": "security",
+      "group": "core"
+    },
+    {
+      "id": "order",
+      "label": "订单服务",
+      "kind": "backend",
+      "group": "core"
+    },
+    {
+      "id": "user",
+      "label": "用户服务",
+      "kind": "backend",
+      "group": "core"
+    },
+    {
+      "id": "pg",
+      "label": "PostgreSQL",
+      "kind": "database",
+      "group": "core"
+    },
+    {
+      "id": "redis",
+      "label": "Redis",
+      "kind": "database",
+      "group": "core"
+    },
+    {
+      "id": "mq",
+      "label": "消息队列",
+      "kind": "messagebus",
+      "group": "core"
+    },
+    {
+      "id": "notify",
+      "label": "通知服务",
+      "kind": "backend",
+      "group": "core"
+    },
+    {
+      "id": "stripe",
+      "label": "Stripe",
+      "kind": "external"
+    }
+  ],
+  "edges": [
+    {
+      "from": "client",
+      "to": "cdn",
+      "label": "HTTPS"
+    },
+    {
+      "from": "cdn",
+      "to": "gateway"
+    },
+    {
+      "from": "gateway",
+      "to": "auth"
+    },
+    {
+      "from": "gateway",
+      "to": "order",
+      "label": "下单"
+    },
+    {
+      "from": "gateway",
+      "to": "user"
+    },
+    {
+      "from": "order",
+      "to": "pg",
+      "label": "读写"
+    },
+    {
+      "from": "order",
+      "to": "redis"
+    },
+    {
+      "from": "order",
+      "to": "mq",
+      "label": "发布事件"
+    },
+    {
+      "from": "mq",
+      "to": "notify",
+      "label": "订阅"
+    },
+    {
+      "from": "order",
+      "to": "stripe",
+      "label": "扣款",
+      "variant": "dashed"
+    }
+  ],
+  "views": [
+    {
+      "id": "entry",
+      "label": "入口链路",
+      "focus": [
+        "client",
+        "cdn",
+        "gateway"
+      ],
+      "note": "从客户端到网关"
+    },
+    {
+      "id": "order",
+      "label": "下单主路径",
+      "focus": [
+        "gateway",
+        "order",
+        "pg"
+      ],
+      "note": "下单写库"
+    },
+    {
+      "id": "async",
+      "label": "异步通知",
+      "focus": [
+        "order",
+        "mq",
+        "notify"
+      ],
+      "note": "事件驱动的旁路"
+    }
+  ]
+}

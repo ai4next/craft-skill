@@ -1,0 +1,21 @@
+{
+  "kind": "freeform",
+  "direction": "TB",
+  "title": "静态资源分发路径",
+  "nodes": [
+    { "id": "browser", "label": "浏览器", "sublabel": "Web / 移动端", "kind": "default", "pos": [0, 0] },
+    { "id": "edge", "label": "边缘节点", "sublabel": "就近回源", "kind": "default", "pos": [260, 0] },
+    { "id": "origin", "label": "源站", "kind": "default", "pos": [520, 0] },
+    { "id": "dns", "label": "DNS 调度", "kind": "default", "pos": [0, 150] },
+    { "id": "oss", "label": "对象存储", "sublabel": "静态文件", "kind": "default", "pos": [260, 150] },
+    { "id": "log", "label": "访问日志", "kind": "default", "pos": [520, 150] }
+  ],
+  "edges": [
+    { "from": "browser", "to": "dns", "label": "解析" },
+    { "from": "dns", "to": "edge" },
+    { "from": "browser", "to": "edge", "label": "GET" },
+    { "from": "edge", "to": "origin", "label": "未命中" },
+    { "from": "origin", "to": "oss" },
+    { "from": "oss", "to": "log" }
+  ]
+}

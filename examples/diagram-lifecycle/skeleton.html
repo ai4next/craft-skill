@@ -1,0 +1,73 @@
+<!--
+  lifecycle 子类型的最小骨架 —— 「往 assets/template.html 的四个哨兵槽里写什么」的示范。
+
+  不要单独打开这个文件。用法：复制 assets/template.html，把下面四段分别替换掉
+  对应的哨兵注释。
+
+  状态机的模型形状：phases + events + transitions（+ 可选 outcomes）。
+  **没有 nodes/edges**。事件用 phase 归属相位，相位栏位由运行时排。
+-->
+
+
+<!-- ═══════════ 替换 HEAD_SLOT ═══════════ -->
+
+<title>任务状态机</title>
+<meta name="description" content="一个最小状态机示例：排队、执行、成功与失败重试">
+
+<style>
+  .diagram-wrap { margin-top: var(--craft-sp-5); }
+</style>
+
+
+<!-- ═══════════ 替换 BODY_SLOT ═══════════ -->
+
+<h1>任务状态机</h1>
+
+<p class="craft-lede">
+  一个任务从排队到终态的全部流转，含失败态与重试路径。
+</p>
+
+<div class="diagram-wrap">
+  <div data-craft-diagram="lifecycle"
+       data-craft-model="main"
+       data-craft-diagram-label="任务状态流转图"></div>
+
+  <p class="craft-caption">
+    <strong>示意内容</strong> —— 用于演示，不代表任何真实系统。
+  </p>
+</div>
+
+
+<!-- ═══════════ 替换 DATA_SLOT ═══════════ -->
+
+<script type="application/json" data-craft-data="main">
+{
+  "kind": "lifecycle",
+  "title": "任务状态机",
+  "phases": [
+    { "id": "p1", "label": "待处理" },
+    { "id": "p2", "label": "处理中" },
+    { "id": "p3", "label": "终态" }
+  ],
+  "events": [
+    { "id": "queued", "label": "排队", "phase": "p1", "type": "normal" },
+    { "id": "running", "label": "执行中", "phase": "p2", "type": "normal" },
+    { "id": "failed", "label": "失败", "phase": "p2", "type": "failure" }
+  ],
+  "outcomes": [
+    { "id": "done", "label": "已完成", "phase": "p3" }
+  ],
+  "transitions": [
+    { "from": "queued", "to": "running", "label": "开始" },
+    { "from": "running", "to": "done", "label": "成功" },
+    { "from": "running", "to": "failed", "label": "出错" },
+    { "from": "failed", "to": "queued", "label": "重试" }
+  ]
+}
+</script>
+
+
+<!-- ═══════════ 替换 SCRIPT_SLOT ═══════════ -->
+
+<!-- 留空。注意：type 为 failure 的状态必须有回到非终态的转移，
+     否则 check.mjs 报 model/lifecycle-terminal —— 读者会以为流程卡死了。 -->

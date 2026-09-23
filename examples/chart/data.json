@@ -1,0 +1,33 @@
+{
+  "meta": {
+    "title": "某 SaaS 产品 2025 年月度新增用户",
+    "unit": "万人",
+    "source": "示意数据 —— 仅用于演示 craft 的图表形态，不代表任何真实业务"
+  },
+  "rows": [
+    { "month": "2025-01-01", "channel": "自然流量", "users": 12.4 },
+    { "month": "2025-01-01", "channel": "付费投放", "users": 8.1 },
+    { "month": "2025-02-01", "channel": "自然流量", "users": 11.2 },
+    { "month": "2025-02-01", "channel": "付费投放", "users": 9.6 },
+    { "month": "2025-03-01", "channel": "自然流量", "users": 14.8 },
+    { "month": "2025-03-01", "channel": "付费投放", "users": 12.3 },
+    { "month": "2025-04-01", "channel": "自然流量", "users": 15.1 },
+    { "month": "2025-04-01", "channel": "付费投放", "users": 13.9 },
+    { "month": "2025-05-01", "channel": "自然流量", "users": 16.7 },
+    { "month": "2025-05-01", "channel": "付费投放", "users": 15.2 },
+    { "month": "2025-06-01", "channel": "自然流量", "users": 18.3 },
+    { "month": "2025-06-01", "channel": "付费投放", "users": 14.4 },
+    { "month": "2025-07-01", "channel": "自然流量", "users": 17.6 },
+    { "month": "2025-07-01", "channel": "付费投放", "users": 12.8 },
+    { "month": "2025-08-01", "channel": "自然流量", "users": 19.2 },
+    { "month": "2025-08-01", "channel": "付费投放", "users": 13.5 },
+    { "month": "2025-09-01", "channel": "自然流量", "users": 22.5 },
+    { "month": "2025-09-01", "channel": "付费投放", "users": 16.1 },
+    { "month": "2025-10-01", "channel": "自然流量", "users": 24.8 },
+    { "month": "2025-10-01", "channel": "付费投放", "users": 18.7 },
+    { "month": "2025-11-01", "channel": "自然流量", "users": 27.3 },
+    { "month": "2025-11-01", "channel": "付费投放", "users": 21.4 },
+    { "month": "2025-12-01", "channel": "自然流量", "users": 26.1 },
+    { "month": "2025-12-01", "channel": "付费投放", "users": 19.8 }
+  ]
+}

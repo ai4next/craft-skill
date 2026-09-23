@@ -1,0 +1,13 @@
+node_modules/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+.cache/
+
+# 证据产物（截图、冻结回执）—— 属于某次交付，不属于技能内容
+*.shot.png
+*.shot.json
+*.receipt.json

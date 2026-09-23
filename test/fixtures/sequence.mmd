@@ -1,0 +1,6 @@
+sequenceDiagram
+  participant U as 用户
+  participant A as API 网关
+  U->>A: POST /orders
+  A->>A: 校验参数
+  A-->>U: 201 Created

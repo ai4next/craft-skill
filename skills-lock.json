@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "craft": {
+      "source": "ai4next/craft-skill",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "e633436606c60bdc0cacefc1c4be7a01215531ae9f6467db6e8ee2611c794d75"
+    }
+  }
+}

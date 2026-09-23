@@ -1,0 +1,60 @@
+<header class="hero">
+  <h1>月度新增用户趋势</h1>
+  <p class="craft-lede">
+    2025 年自然流量与付费投放两条获客渠道的月度新增用户对比。
+    悬停、或按 Tab 聚焦任意数据点，可查看该月具体数值；图表下方有完整数据表。
+  </p>
+</header>
+
+<section class="chart-block">
+  <h2>两条渠道的走势</h2>
+  <div data-craft-chart="trend"
+       data-craft-chart-type="line"
+       data-craft-data="main"
+       data-craft-x="month"
+       data-craft-x-type="time"
+       data-craft-x-format="%Y-%m"
+       data-craft-x-label="月份"
+       data-craft-y="users"
+       data-craft-y-type="linear"
+       data-craft-y-label="新增用户（万人）"
+       data-craft-series="channel"
+       data-craft-color="categorical"
+       data-craft-height="380"
+       data-craft-zoom="x"
+       data-craft-legend="auto"
+       data-craft-table="auto"
+       data-craft-title="分渠道月度新增用户"
+       data-craft-caption="滚轮缩放、拖拽平移，双击复位"></div>
+</section>
+
+<section class="chart-block">
+  <h2>同期对比</h2>
+  <div data-craft-chart="compare"
+       data-craft-chart-type="bar"
+       data-craft-data="main"
+       data-craft-x="month"
+       data-craft-x-type="time"
+       data-craft-x-format="%Y-%m"
+       data-craft-y="users"
+       data-craft-y-type="linear"
+       data-craft-y-label="新增用户（万人）"
+       data-craft-series="channel"
+       data-craft-height="300"
+       data-craft-legend="none"
+       data-craft-table="none"
+       data-craft-title="同月两渠道并排对比"></div>
+</section>
+
+<details class="craft-card">
+  <summary>这份示例想说明什么</summary>
+  <p>
+    <code>chart</code> 类型走的是<strong>全声明式</strong>路径：整个页面没有写一行 JS，
+    两个图表都由 <code>Craft.boot()</code> 从 <code>data-*</code> 属性自动挂载。
+  </p>
+  <p>
+    需要自定义图形时，才在 <code>SCRIPT_SLOT</code> 里传 <code>render(ctx)</code>，
+    并且必须用 <code>ctx.join()</code> 更新节点 —— 直接 append 会在窗口缩放时产生重影。
+  </p>
+  <p class="craft-note">本页数据为示意数据，不代表任何真实业务。</p>
+</details>

@@ -1,0 +1,75 @@
+<!--
+  architecture 子类型的最小骨架 —— 「往 assets/template.html 的四个哨兵槽里写什么」的示范。
+
+  不要单独打开这个文件。用法：复制 assets/template.html，把下面四段分别替换掉
+  对应的哨兵注释。读完这个文件就够了，不需要再去读 template.html 的运行时源码。
+
+  这个骨架只有 4 个组件、1 个分组、没有标注。先让它通过 check.mjs，再加第二个分组、
+  加视图章节、加标注。
+
+  模型里**没有坐标**。分层、排序、坐标、正交路由、标签避让全由运行时算。
+-->
+
+
+<!-- ═══════════ 替换 HEAD_SLOT ═══════════ -->
+
+<title>服务调用关系</title>
+<meta name="description" content="一个最小架构图示例：网关、服务与数据库">
+
+<style>
+  /* 页面专属样式。颜色一律用 --craft-* 令牌，不要写死。 */
+  .diagram-wrap { margin-top: var(--craft-sp-5); }
+</style>
+
+
+<!-- ═══════════ 替换 BODY_SLOT ═══════════ -->
+
+<h1>服务调用关系</h1>
+
+<p class="craft-lede">
+  请求从网关进入，经过业务服务落到数据库。点击任意组件可查看它的上下游，
+  按 <kbd>/</kbd> 搜索，按 <kbd>f</kbd> 进入演示模式。
+</p>
+
+<div class="diagram-wrap">
+  <div data-craft-diagram="architecture"
+       data-craft-model="main"
+       data-craft-diagram-label="服务调用关系架构图"></div>
+
+  <p class="craft-caption">
+    <strong>示意内容</strong> —— 用于演示，不代表任何真实系统。
+  </p>
+</div>
+
+<!-- 运行时会自动挂载 [data-craft-diagram]，不需要写一行 JS。
+     只有要自定义绘制时才用 SCRIPT_SLOT。 -->
+
+
+<!-- ═══════════ 替换 DATA_SLOT ═══════════ -->
+
+<script type="application/json" data-craft-data="main">
+{
+  "kind": "architecture",
+  "direction": "LR",
+  "title": "服务调用关系",
+  "groups": [
+    { "id": "core", "label": "核心服务" }
+  ],
+  "nodes": [
+    { "id": "client", "label": "客户端", "kind": "external" },
+    { "id": "api", "label": "API 网关", "kind": "frontend" },
+    { "id": "order", "label": "订单服务", "kind": "backend", "group": "core" },
+    { "id": "pg", "label": "PostgreSQL", "kind": "database", "group": "core" }
+  ],
+  "edges": [
+    { "from": "client", "to": "api", "label": "HTTPS" },
+    { "from": "api", "to": "order" },
+    { "from": "order", "to": "pg", "label": "SQL" }
+  ]
+}
+</script>
+
+
+<!-- ═══════════ 替换 SCRIPT_SLOT ═══════════ -->
+
+<!-- 留空：图解走全声明式路径，一行 JS 都不需要。 -->

@@ -1,0 +1,101 @@
+{
+  "kind": "lifecycle",
+  "title": "订单状态机",
+  "phases": [
+    {
+      "id": "p1",
+      "label": "创建"
+    },
+    {
+      "id": "p2",
+      "label": "待支付"
+    },
+    {
+      "id": "p3",
+      "label": "已支付"
+    },
+    {
+      "id": "p4",
+      "label": "已发货"
+    }
+  ],
+  "events": [
+    {
+      "id": "draft",
+      "label": "草稿",
+      "phase": "p1",
+      "type": "normal"
+    },
+    {
+      "id": "pending",
+      "label": "待支付",
+      "phase": "p2",
+      "type": "normal"
+    },
+    {
+      "id": "failed",
+      "label": "支付失败",
+      "phase": "p2",
+      "type": "failure"
+    },
+    {
+      "id": "paid",
+      "label": "已支付",
+      "phase": "p3",
+      "type": "normal"
+    },
+    {
+      "id": "shipped",
+      "label": "已发货",
+      "phase": "p4",
+      "type": "normal"
+    }
+  ],
+  "transitions": [
+    {
+      "from": "draft",
+      "to": "pending",
+      "label": "提交"
+    },
+    {
+      "from": "pending",
+      "to": "paid",
+      "label": "支付成功"
+    },
+    {
+      "from": "pending",
+      "to": "failed",
+      "label": "拒付"
+    },
+    {
+      "from": "failed",
+      "to": "pending",
+      "label": "重试"
+    },
+    {
+      "from": "paid",
+      "to": "shipped",
+      "label": "发货"
+    },
+    {
+      "from": "shipped",
+      "to": "done",
+      "label": "签收"
+    },
+    {
+      "from": "draft",
+      "to": "canceled",
+      "label": "取消"
+    }
+  ],
+  "outcomes": [
+    {
+      "id": "done",
+      "label": "已完成"
+    },
+    {
+      "id": "canceled",
+      "label": "已取消"
+    }
+  ]
+}

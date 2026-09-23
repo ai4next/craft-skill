@@ -1,0 +1,94 @@
+{
+  "kind": "dataflow",
+  "title": "产品分析的数据管道",
+  "stages": [
+    {
+      "id": "src",
+      "label": "数据源"
+    },
+    {
+      "id": "ingest",
+      "label": "接入"
+    },
+    {
+      "id": "wh",
+      "label": "数仓"
+    },
+    {
+      "id": "consume",
+      "label": "消费"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "app",
+      "label": "埋点事件",
+      "stage": "src",
+      "kind": "source"
+    },
+    {
+      "id": "crm",
+      "label": "CRM 导出",
+      "stage": "src",
+      "kind": "source"
+    },
+    {
+      "id": "kafka",
+      "label": "Kafka",
+      "stage": "ingest",
+      "kind": "transform"
+    },
+    {
+      "id": "dbt",
+      "label": "dbt 模型",
+      "stage": "wh",
+      "kind": "transform"
+    },
+    {
+      "id": "pg",
+      "label": "Postgres",
+      "stage": "wh",
+      "kind": "store"
+    },
+    {
+      "id": "bi",
+      "label": "BI 看板",
+      "stage": "consume",
+      "kind": "consumer"
+    },
+    {
+      "id": "alert",
+      "label": "告警",
+      "stage": "consume",
+      "kind": "consumer"
+    }
+  ],
+  "flows": [
+    {
+      "from": "app",
+      "to": "kafka"
+    },
+    {
+      "from": "crm",
+      "to": "kafka"
+    },
+    {
+      "from": "kafka",
+      "to": "dbt",
+      "label": "raw"
+    },
+    {
+      "from": "dbt",
+      "to": "pg"
+    },
+    {
+      "from": "pg",
+      "to": "bi",
+      "label": "SQL"
+    },
+    {
+      "from": "pg",
+      "to": "alert"
+    }
+  ]
+}

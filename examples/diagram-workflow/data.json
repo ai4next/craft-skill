@@ -1,0 +1,25 @@
+{
+  "kind": "workflow",
+  "title": "CI/CD 发布流程",
+  "lanes": [
+    { "id": "dev", "label": "开发" },
+    { "id": "ci", "label": "CI" },
+    { "id": "ops", "label": "运维" }
+  ],
+  "steps": [
+    { "id": "push", "label": "git push", "lane": "dev", "kind": "start" },
+    { "id": "build", "label": "构建镜像", "lane": "ci", "kind": "task" },
+    { "id": "test", "label": "测试通过？", "lane": "ci", "kind": "decision" },
+    { "id": "approve", "label": "人工审批", "lane": "ops", "kind": "task" },
+    { "id": "deploy", "label": "滚动发布", "lane": "ops", "kind": "task" },
+    { "id": "live", "label": "已上线", "lane": "ops", "kind": "end" }
+  ],
+  "edges": [
+    { "from": "push", "to": "build" },
+    { "from": "build", "to": "test" },
+    { "from": "test", "to": "approve", "label": "是" },
+    { "from": "test", "to": "push", "label": "否", "kind": "retry" },
+    { "from": "approve", "to": "deploy" },
+    { "from": "deploy", "to": "live" }
+  ]
+}

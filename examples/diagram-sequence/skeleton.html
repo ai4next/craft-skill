@@ -1,0 +1,69 @@
+<!--
+  sequence 子类型的最小骨架 —— 「往 assets/template.html 的四个哨兵槽里写什么」的示范。
+
+  不要单独打开这个文件。用法：复制 assets/template.html，把下面四段分别替换掉
+  对应的哨兵注释。
+
+  时序图的模型形状与 architecture 完全不同：用 participants + messages，
+  **没有 nodes/edges**。消息不写 y —— 行距、生命线、激活条全由运行时算。
+-->
+
+
+<!-- ═══════════ 替换 HEAD_SLOT ═══════════ -->
+
+<title>下单请求时序</title>
+<meta name="description" content="一个最小时序图示例：浏览器、网关与数据库之间的一次调用">
+
+<style>
+  .diagram-wrap { margin-top: var(--craft-sp-5); }
+</style>
+
+
+<!-- ═══════════ 替换 BODY_SLOT ═══════════ -->
+
+<h1>下单请求时序</h1>
+
+<p class="craft-lede">
+  一次下单请求在各参与者之间的往返。点击任意参与者可查看它参与的消息。
+</p>
+
+<div class="diagram-wrap">
+  <div data-craft-diagram="sequence"
+       data-craft-model="main"
+       data-craft-diagram-label="下单请求的调用时序图"></div>
+
+  <p class="craft-caption">
+    <strong>示意内容</strong> —— 用于演示，不代表任何真实系统。
+  </p>
+</div>
+
+
+<!-- ═══════════ 替换 DATA_SLOT ═══════════ -->
+
+<script type="application/json" data-craft-data="main">
+{
+  "kind": "sequence",
+  "title": "下单请求时序",
+  "participants": [
+    { "id": "u", "label": "用户" },
+    { "id": "api", "label": "API 网关" },
+    { "id": "order", "label": "订单服务" },
+    { "id": "pg", "label": "PostgreSQL" }
+  ],
+  "messages": [
+    { "from": "u", "to": "api", "label": "POST /orders" },
+    { "from": "api", "to": "order", "label": "创建订单" },
+    { "from": "order", "to": "pg", "label": "INSERT" },
+    { "from": "pg", "to": "order", "label": "ok" },
+    { "from": "order", "to": "api", "label": "201" },
+    { "from": "api", "to": "u", "label": "201 Created" }
+  ]
+}
+</script>
+
+
+<!-- ═══════════ 替换 SCRIPT_SLOT ═══════════ -->
+
+<!-- 留空。需要 opt/loop 区块时，在模型里加 blocks（from/to 是 messages 的下标）：
+     { "kind": "opt", "from": 2, "to": 3, "label": "事务" }
+     下标越界会被 check.mjs 报 model/block-range。 -->

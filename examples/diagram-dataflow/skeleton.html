@@ -1,0 +1,70 @@
+<!--
+  dataflow 子类型的最小骨架 —— 「往 assets/template.html 的四个哨兵槽里写什么」的示范。
+
+  不要单独打开这个文件。用法：复制 assets/template.html，把下面四段分别替换掉
+  对应的哨兵注释。
+
+  数据管道的模型形状：stages + nodes（节点用 stage 归属阶段）+ edges。
+  阶段列宽与行内堆叠由运行时算，你只写「谁属于哪个阶段、谁流向谁」。
+-->
+
+
+<!-- ═══════════ 替换 HEAD_SLOT ═══════════ -->
+
+<title>埋点数据管道</title>
+<meta name="description" content="一个最小数据管道示例：从埋点采集到分析消费">
+
+<style>
+  .diagram-wrap { margin-top: var(--craft-sp-5); }
+</style>
+
+
+<!-- ═══════════ 替换 BODY_SLOT ═══════════ -->
+
+<h1>埋点数据管道</h1>
+
+<p class="craft-lede">
+  埋点数据从采集到可查询的完整链路。点击任意节点可查看它的上下游。
+</p>
+
+<div class="diagram-wrap">
+  <div data-craft-diagram="dataflow"
+       data-craft-model="main"
+       data-craft-diagram-label="埋点数据管道图"></div>
+
+  <p class="craft-caption">
+    <strong>示意内容</strong> —— 用于演示，不代表任何真实系统。
+  </p>
+</div>
+
+
+<!-- ═══════════ 替换 DATA_SLOT ═══════════ -->
+
+<script type="application/json" data-craft-data="main">
+{
+  "kind": "dataflow",
+  "title": "埋点数据管道",
+  "stages": [
+    { "id": "src", "label": "数据源" },
+    { "id": "ingest", "label": "接入" },
+    { "id": "wh", "label": "数仓" },
+    { "id": "consume", "label": "消费" }
+  ],
+  "nodes": [
+    { "id": "app", "label": "客户端埋点", "stage": "src", "kind": "source" },
+    { "id": "collector", "label": "采集服务", "stage": "ingest", "kind": "transform" },
+    { "id": "dwd", "label": "明细层", "stage": "wh", "kind": "store" },
+    { "id": "bi", "label": "报表看板", "stage": "consume", "kind": "consumer" }
+  ],
+  "edges": [
+    { "from": "app", "to": "collector", "label": "上报" },
+    { "from": "collector", "to": "dwd", "label": "写入" },
+    { "from": "dwd", "to": "bi", "label": "查询" }
+  ]
+}
+</script>
+
+
+<!-- ═══════════ 替换 SCRIPT_SLOT ═══════════ -->
+
+<!-- 留空。节点的 stage 必须出现在 stages 里，否则 check.mjs 报 model/unknown-stage。 -->

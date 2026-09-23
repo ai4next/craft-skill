@@ -1,0 +1,87 @@
+<script>
+/* explainer 的页面逻辑：一个纯函数把 state 变成数据，其余交给运行时。
+   这里刻意不写任何 resize / 主题监听 / DOM 重建 —— Craft.chart 已经拥有了。 */
+
+(function () {
+  'use strict';
+
+  /* 纯函数：同样的 state 必须得到同样的序列。
+     复利与单利两条路径都算出来，读者一勾选就能看出差别。 */
+  function project(state) {
+    var monthly = state.monthly;
+    var r = state.rate / 100 / 12;
+    var years = Math.round(state.years);
+    var rows = [];
+    var balance = 0;      // 复利：利息留在账户里
+    var simple = 0;       // 单利：每年把利息取走
+    var contributed = 0;
+
+    for (var y = 0; y <= years; y++) {
+      if (y > 0) {
+        for (var m = 0; m < 12; m++) {
+          if (state.withdraw) {
+            /* 利息当年取走 → 账户里永远只有本金 */
+            balance += monthly;
+            simple += balance * r;
+          } else {
+            balance = balance * (1 + r) + monthly;
+          }
+          contributed += monthly;
+        }
+      }
+      rows.push({ year: y, amount: (state.withdraw ? balance + simple : balance) / 10000, kind: '总额' });
+      rows.push({ year: y, amount: contributed / 10000, kind: '本金' });
+    }
+    return {
+      rows: rows,
+      total: state.withdraw ? balance + simple : balance,
+      contributed: contributed
+    };
+  }
+
+  function wan(v) { return (v / 10000).toFixed(1) + ' 万'; }
+
+  Craft.ready(function () {
+    var readout = document.getElementById('readout');
+    var chart = null;
+
+    function draw(state) {
+      var out = project(state);
+      /* 图表在下面才挂载 —— bind 的首次 onChange 会先跑，那时 chart 还不存在 */
+      if (chart) chart.update(out.rows);
+      readout.innerHTML =
+        '第 ' + Math.round(state.years) + ' 年：总额 <strong>' + wan(out.total) + '</strong>' +
+        '，本金 ' + wan(out.contributed) +
+        '，利息 <strong>' + wan(out.total - out.contributed) + '</strong>' +
+        (state.withdraw ? '（已切换为单利）' : '');
+    }
+
+    var controls = Craft.bind('#controls', {
+      state: { monthly: 2000, rate: 6, years: 30, withdraw: false },
+      onChange: draw
+    });
+
+    /* mount 必须带上初始 data —— 没有数据的图表会挂成一个空壳，什么都不画 */
+    chart = Craft.chart.mount('#chart', {
+      height: 320,
+      data: project(controls.state).rows,
+      x: { field: 'year', type: 'linear', label: '年' },
+      y: { field: 'amount', type: 'linear', label: '金额（万元）', grid: true },
+      series: { field: 'kind', color: 'categorical' },
+      render: Craft.marks.line
+    });
+    draw(controls.state);
+
+    Craft.step('#story', {
+      onStep: function (i) {
+        /* 分步叙事与控件联动：机制那一步（2）才把年限滑杆交出来 ——
+           读者一次只面对一个新概念。 */
+        var yearsField = document.querySelector('#years').closest('.craft-field');
+        if (yearsField) yearsField.hidden = i < 2;
+        var withdrawField = document.querySelector('#withdraw').closest('.craft-field');
+        if (withdrawField) withdrawField.hidden = i < 3;
+      }
+    });
+  });
+})();
+</script>

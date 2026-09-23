@@ -1,0 +1,75 @@
+<h1>利用率 90% 意味着什么</h1>
+
+<p class="craft-lede">
+  一台服务器 90% 的时间在忙，听起来还有一成余量。
+  但排队长度和利用率不是线性关系 —— 把「服务能力」滑杆慢慢往下拖，
+  看排队长度在最后一段怎么失控。
+</p>
+
+<div data-craft-sim="queue" data-craft-frame="manual">
+
+  <div id="queue-chart"></div>
+
+  <div class="craft-fields">
+    <div class="craft-field">
+      <label for="arrival">平均到达率（请求/秒）</label>
+      <input id="arrival" type="range" min="0.2" max="2" step="0.05" value="0.9"
+             data-craft-control="arrival">
+      <output data-craft-output="arrival" data-craft-format="number"></output>
+    </div>
+    <div class="craft-field">
+      <label for="service">服务能力（请求/秒）</label>
+      <input id="service" type="range" min="0.5" max="2.5" step="0.05" value="1.0"
+             data-craft-control="service">
+      <output data-craft-output="service" data-craft-format="number"></output>
+    </div>
+    <div class="craft-field">
+      <label for="seed">随机种子（换一个看另一次运行）</label>
+      <input id="seed" type="range" min="1" max="99" step="1" value="42"
+             data-craft-control="seed">
+      <output data-craft-output="seed" data-craft-format="number"></output>
+    </div>
+
+    <button class="craft-btn" type="button" data-craft-sim-step>继续推进</button>
+    <button class="craft-btn" type="button" data-craft-sim-reset>重置</button>
+  </div>
+
+  <dl class="sim-readout">
+    <div class="sim-stat">
+      <dt>平均利用率</dt>
+      <dd id="stat-util">—</dd>
+    </div>
+    <div class="sim-stat">
+      <dt>当前排队</dt>
+      <dd id="stat-queue">—</dd>
+    </div>
+    <div class="sim-stat">
+      <dt>峰值排队</dt>
+      <dd id="stat-peak">—</dd>
+    </div>
+  </dl>
+</div>
+
+<section class="craft-prose">
+  <h2>这张图在说什么</h2>
+  <p>
+    请求的到达是随机的，服务时长也是随机的。直觉上只要平均到达率低于服务能力，
+    队列总该排空 —— 但事实不是这样：队列长度与利用率是<strong>非线性</strong>的。
+  </p>
+  <p>
+    把「服务能力」从 1.0 慢慢拖到 0.95（利用率 90% → 95%），
+    你会看到排队长度不是涨一点点，而是<strong>成倍地涨</strong>。
+    理论上 M/M/1 的平均队长是 <code>ρ/(1−ρ)</code>：
+    利用率 50% 时是 1，90% 时是 9，99% 时是 99。
+  </p>
+  <p>
+    这就是「差一点点就崩」的由来：余量越少，余量的价值越大。
+    多留一点冗余不是浪费，是在买断那条陡峭的尾巴。
+  </p>
+</section>
+
+<p class="craft-caption">
+  <strong>模型推算</strong> —— M/M/1 排队模型的模拟，随机数用固定种子（见「随机种子」控件），
+  因此同样的参数必然得到同样的曲线。用于演示「利用率与排队长度非线性」这一机制，
+  不是任何真实系统的容量规划依据。
+</p>

@@ -1,0 +1,65 @@
+<!--
+  freeform 子类型的最小骨架 —— 「往 assets/template.html 的四个哨兵槽里写什么」的示范。
+
+  不要单独打开这个文件。用法：复制 assets/template.html，把下面四段分别替换掉
+  对应的哨兵注释。
+
+  freeform 是唯一一个**作者给坐标**的子类型：节点用 pos: [x, y]。
+  其余五个子类型的模型里没有坐标。边仍然走正交路由器。
+-->
+
+
+<!-- ═══════════ 替换 HEAD_SLOT ═══════════ -->
+
+<title>自定义布局</title>
+<meta name="description" content="一个 freeform 图解示例：作者显式指定节点坐标">
+
+<style>
+  .diagram-wrap { margin-top: var(--craft-sp-5); }
+</style>
+
+
+<!-- ═══════════ 替换 BODY_SLOT ═══════════ -->
+
+<h1>自定义布局</h1>
+
+<p class="craft-lede">
+  坐标由作者给出，边仍由运行时正交路由。
+</p>
+
+<div class="diagram-wrap">
+  <div data-craft-diagram="freeform"
+       data-craft-model="main"
+       data-craft-diagram-label="自定义布局图解"></div>
+
+  <p class="craft-caption">
+    <strong>示意内容</strong> —— 用于演示，不代表任何真实系统。
+  </p>
+</div>
+
+
+<!-- ═══════════ 替换 DATA_SLOT ═══════════ -->
+
+<script type="application/json" data-craft-data="main">
+{
+  "kind": "freeform",
+  "title": "自定义布局",
+  "nodes": [
+    { "id": "a", "label": "入口", "pos": [0, 0] },
+    { "id": "b", "label": "处理", "pos": [220, 0] },
+    { "id": "c", "label": "存储", "pos": [220, 140] },
+    { "id": "d", "label": "出口", "pos": [0, 140] }
+  ],
+  "edges": [
+    { "from": "a", "to": "b", "label": "请求" },
+    { "from": "b", "to": "c", "label": "写入" },
+    { "from": "c", "to": "d", "label": "读取" }
+  ]
+}
+</script>
+
+
+<!-- ═══════════ 替换 SCRIPT_SLOT ═══════════ -->
+
+<!-- 留空。不写 pos 的节点会被自动排成一行 —— 可以混用，
+     但整张图的意图通常要么全自动、要么全手动。 -->

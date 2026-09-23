@@ -1,0 +1,7 @@
+flowchart LR
+  A[客户端] --> B[API 网关]
+  B --> C{已登录?}
+  C -->|是| D[订单服务]
+  C -->|否| E[认证服务]
+  D --> F[(PostgreSQL)]
+  E --> B

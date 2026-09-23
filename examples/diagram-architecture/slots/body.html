@@ -1,0 +1,29 @@
+<header class="hero">
+  <h1>订单系统的运行时架构</h1>
+  <p class="craft-lede">
+    从客户端到数据存储的完整链路，以及事件驱动的异步旁路。
+    滚轮缩放、拖拽平移，点击任意组件查看详情，按 Tab 可以逐个聚焦。
+  </p>
+</header>
+
+<section class="diagram-block">
+  <div data-craft-diagram="architecture"
+       data-craft-model="main"
+       data-craft-diagram-label="订单系统运行时架构图"></div>
+
+  <p class="craft-caption">
+    <strong>示意架构</strong> —— 用于演示 craft 的图解能力，不对应任何真实系统。
+  </p>
+</section>
+
+<details class="craft-card">
+  <summary>这份示例想说明什么</summary>
+  <p>
+    整张图里<strong>没有一个坐标</strong>。模型只描述了「有哪些组件、谁连谁、谁属于哪个分组」，
+    分层、排序、坐标、正交路由、端口分配、标签避让全部由运行时算出。
+  </p>
+  <p>
+    对比之下，同类工具要求作者为每个组件手写 <code>x/y</code> 和 <code>宽/高</code>，
+    再用一堆校验器去检查这些手写的坐标有没有重叠、有没有压住别的元素。
+  </p>
+</details>

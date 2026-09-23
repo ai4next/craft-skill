@@ -1,0 +1,134 @@
+<h1>复利最反直觉的地方</h1>
+
+<p class="craft-lede">
+  每月存 2000 元，年化 6%，存 30 年 —— 你放进去的本金一共是 72 万。
+  但到期时账户里会有多少钱？先猜一个数，再往下看。
+</p>
+
+<nav data-craft-rail aria-label="讲解步骤"></nav>
+
+<div class="explain-grid">
+
+  <div class="explain-story" id="story">
+
+    <section data-craft-step="0" data-craft-step-title="钩子">
+      <h2>先猜一个数</h2>
+      <p>
+        每月 2000 元，年化 6%，连续 30 年。投入的本金一共 <strong>72 万</strong>。
+        到期时账户里大约有多少？
+      </p>
+      <p>
+        多数人的第一反应是「一百多万吧」。实际是 <strong>200.9 万</strong> ——
+        其中 <strong>128.9 万是利息</strong>，比本金还多出 57 万。
+      </p>
+      <p>但真正反直觉的不是「利息很多」，而是这些利息<strong>几乎全部产生在最后几年</strong>。</p>
+    </section>
+
+    <section data-craft-step="1" data-craft-step-title="直觉">
+      <h2>钱是按「已经有多少」来生钱的</h2>
+      <p>
+        利息不是按你<strong>投入</strong>了多少算，而是按账户里<strong>已经躺着</strong>多少算。
+      </p>
+      <p>
+        早期账户里钱少，利息也少；等账户里攒下一大笔钱，哪怕利率一点没变，
+        每年生出来的利息也会变得很大。
+      </p>
+      <p>
+        右边那张图里，浅色那条是本金 —— 一条直线；深色那条是总额 —— 一路往上翘。
+        中间张开的那个口子，就是复利本身。
+      </p>
+    </section>
+
+    <section data-craft-step="2" data-craft-step-title="机制">
+      <h2>拆开看：每一年的利息，来自上一年</h2>
+      <p>把 30 年切成三段，每段产生的利息是：</p>
+      <ul>
+        <li>第 1–10 年：约 <strong>8.8 万</strong></li>
+        <li>第 11–20 年：约 <strong>35.6 万</strong></li>
+        <li>第 21–30 年：约 <strong>84.5 万</strong></li>
+      </ul>
+      <p>
+        最后 10 年产生的利息，是头 10 年的 <strong>9.6 倍</strong>。
+        这三段里利率一次都没变过，你每月的投入也一模一样 ——
+        变的只有「基数」。
+      </p>
+      <p>
+        把右边「年限」滑杆从 30 拖到 20、再拖到 40。你会发现从 30 年到 40 年
+        多出来的钱，比从 0 到 20 年攒下的还多。
+      </p>
+    </section>
+
+    <section data-craft-step="3" data-craft-step-title="边界">
+      <h2>这套说法在哪里不成立</h2>
+      <p>上面的结论建立在两个假设上，缺一个就不成立。</p>
+      <p>
+        <strong>一、收益必须留在账户里。</strong>
+        勾上右边的「每年把利息取走」，复利立刻退化成单利：
+        总额从 200.9 万掉到 <strong>136.6 万</strong>，少了 64 万。
+        你投入的钱一分没少，少掉的全部是「利息生出来的利息」。
+      </p>
+      <p>
+        <strong>二、「年化 6%」被当成了每年都一样。</strong>
+        真实市场有波动，而同样的跌幅发生在早期还是晚期，后果完全不同 ——
+        越到后期，账户里的钱越多，同样的百分比吃掉的钱也越多。
+      </p>
+      <p>换句话说：复利放大收益，也放大波动，而且是在你最有钱的时候放大。</p>
+    </section>
+
+    <section data-craft-step="4" data-craft-step-title="应用">
+      <h2>能拿它做什么判断</h2>
+      <p>这个模型只说明一件事：<strong>时间的作用不是线性的，最后一段最值钱。</strong></p>
+      <p>由此可以推出三个判断：</p>
+      <ul>
+        <li>中断的代价不是「少存了几年」，而是「砍掉了最值钱的那几年」。</li>
+        <li>同样一笔钱，早投 10 年和晚投 10 年，差距远大于直觉。</li>
+        <li>反过来看负债：高息负债的利息也是复利，同样在后期加速。</li>
+      </ul>
+      <p>
+        把「年化」拖到 1% 试试 —— 曲线几乎是直的，复利几乎不起作用；
+        拖到 12% —— 口子大得夸张。同一个机制，强度差了几十倍。
+      </p>
+    </section>
+
+  </div>
+
+  <div class="explain-panel">
+    <div id="chart"></div>
+
+    <div class="craft-fields" id="controls">
+      <div class="craft-field">
+        <label for="monthly">每月投入（元）</label>
+        <input id="monthly" type="range" min="500" max="5000" step="100" value="2000"
+               data-craft-control="monthly">
+        <output data-craft-output="monthly" data-craft-format="number"></output>
+      </div>
+      <div class="craft-field">
+        <label for="rate">年化收益率（%）</label>
+        <input id="rate" type="range" min="1" max="12" step="0.5" value="6"
+               data-craft-control="rate">
+        <output data-craft-output="rate" data-craft-format="number"></output>
+      </div>
+      <div class="craft-field">
+        <label for="years">年限（年）</label>
+        <input id="years" type="range" min="5" max="40" step="1" value="30"
+               data-craft-control="years">
+        <output data-craft-output="years" data-craft-format="number"></output>
+      </div>
+      <div class="craft-field">
+        <label for="withdraw">
+          <input id="withdraw" type="checkbox" data-craft-control="withdraw">
+          每年把利息取走（变成单利）
+        </label>
+      </div>
+      <button class="craft-btn" type="button" data-craft-reset>重置</button>
+    </div>
+
+    <p class="explain-readout" id="readout" aria-live="polite"></p>
+
+    <p class="craft-caption">
+      <strong>模型推算</strong> —— 按固定年化收益率的复利公式计算，不是真实历史数据，
+      也不构成任何投资建议。
+    </p>
+  </div>
+
+</div>

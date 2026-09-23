@@ -1,0 +1,113 @@
+<script>
+/* simulation 的页面逻辑。
+
+   **确定性**：随机数用固定种子的 PRNG，不是 Math.random ——
+   同样的参数必然得到同样的曲线。种子是可见参数，读者可以换一个看不同的一次运行，
+   但不会「同样参数每次都不一样」。这是 references/explainer-craft.md 点名要求的。
+
+   模型是 M/M/1 排队：到达间隔与服务时长都服从指数分布。
+   之所以不用「到达率随时间波动」的流体模型：那个模型的积压有上界，
+   无论利用率多高都不会失控，演示不出排队论真正的非线性。 */
+
+(function () {
+  'use strict';
+
+  var EVENTS_PER_CLICK = 400;   // 一次「推进」处理的事件数
+  var PRIME_EVENTS = 600;       // 载入时先跑这么多，首屏就有真实曲线而不是空坐标系
+  var SAMPLE_EVERY = 4;         // 每 4 个事件记一个采样点
+  var WINDOW = 400;             // 采样点上限，防止长时间推进把数组撑爆
+
+  /* mulberry32：小而确定的 PRNG，同样的种子给出同样的序列 */
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      var t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  function expRandom(rand, rate) { return -Math.log(1 - rand()) / rate; }
+
+  function setStat(id, text, alert) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = text;
+    el.setAttribute('data-alert', alert ? 'true' : 'false');
+  }
+
+  /* 推进 n 个事件。抽出来是为了让 reset 能「预跑」一段 ——
+     否则首屏是一张空坐标系，读者不动任何控件就看不到任何东西。 */
+  function advance(ctx, events) {
+    var sim = ctx.sim;
+    var lambda = Math.max(0.01, ctx.state.arrival);
+    var mu = Math.max(0.01, ctx.state.service);
+
+    for (var i = 0; i < events; i++) {
+      if (sim.nextArrival <= sim.nextDeparture) {
+        /* 到达 */
+        sim.t = sim.nextArrival;
+        sim.q += 1;
+        sim.nextArrival = sim.t + expRandom(sim.rand, lambda);
+        if (sim.q === 1) sim.nextDeparture = sim.t + expRandom(sim.rand, mu);
+      } else {
+        /* 离开 */
+        sim.t = sim.nextDeparture;
+        sim.q -= 1;
+        sim.served += 1;
+        sim.busy += 1;
+        sim.nextDeparture = sim.q > 0 ? sim.t + expRandom(sim.rand, mu) : Infinity;
+      }
+      sim.peak = Math.max(sim.peak, sim.q);
+      if (i % SAMPLE_EVERY === 0) {
+        sim.history.push({ t: +sim.t.toFixed(1), queue: sim.q });
+      }
+    }
+    if (sim.history.length > WINDOW) sim.history.splice(0, sim.history.length - WINDOW);
+  }
+
+  Craft.sim.define('queue', {
+    state: { arrival: 0.9, service: 1.0, seed: 42 },
+
+    /* 参数一变就清空历史：否则新旧两种参数的结果会接在一条曲线上，读者读到假结论 */
+    reset: function (ctx) {
+      var sim = ctx.sim;
+      sim.rand = mulberry32(Math.round(ctx.state.seed) || 1);
+      sim.t = 0;
+      sim.q = 0;
+      sim.peak = 0;
+      sim.served = 0;
+      sim.busy = 0;
+      sim.nextArrival = expRandom(sim.rand, Math.max(0.01, ctx.state.arrival));
+      sim.nextDeparture = Infinity;
+      sim.history = [{ t: 0, queue: 0 }];
+      advance(ctx, PRIME_EVENTS);
+    },
+
+    step: function (ctx) {
+      if (!ctx.sim.history) ctx.sim.def.reset(ctx);
+      advance(ctx, EVENTS_PER_CLICK);
+    },
+
+    draw: function (ctx) {
+      var sim = ctx.sim;
+      if (!sim.chart) {
+        sim.chart = Craft.chart.mount('#queue-chart', {
+          height: 300,
+          data: sim.history,
+          x: { field: 't', type: 'linear', label: '时间（秒）' },
+          y: { field: 'queue', type: 'linear', label: '排队长度（请求数）', grid: true },
+          render: Craft.marks.area
+        });
+      } else {
+        sim.chart.update(sim.history);
+      }
+
+      var rho = ctx.state.arrival / Math.max(0.01, ctx.state.service);
+      setStat('stat-util', (rho * 100).toFixed(0) + '%', rho >= 0.85);
+      setStat('stat-queue', String(sim.q), sim.q > 8);
+      setStat('stat-peak', String(sim.peak), sim.peak > 20);
+    }
+  });
+})();
+</script>

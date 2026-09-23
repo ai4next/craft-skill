@@ -1,0 +1,74 @@
+<!--
+  chart 类型的最小骨架 —— 这是「往 assets/template.html 的四个哨兵槽里写什么」的示范。
+
+  不要单独打开这个文件。用法：复制 assets/template.html，把下面四段分别替换掉
+  对应的哨兵注释。读完这个文件就够了，不需要再去读 template.html 的运行时源码。
+
+  这个骨架只画一个系列、没有控件、没有标注。先让它通过 check.mjs，
+  再加第二个系列、图例说明、标注。
+-->
+
+
+<!-- ═══════════ 替换 HEAD_SLOT ═══════════ -->
+
+<title>月度新增用户</title>
+<meta name="description" content="某产品 2025 年按月的新增用户趋势">
+
+<style>
+  /* 页面专属样式。颜色一律用 --craft-* 令牌，不要写死。 */
+  .chart-wrap { margin-top: var(--craft-sp-5); }
+</style>
+
+
+<!-- ═══════════ 替换 BODY_SLOT ═══════════ -->
+
+<h1>月度新增用户</h1>
+
+<p class="craft-lede">
+  2025 年全年新增用户的变化趋势。悬停或键盘聚焦任意数据点可查看具体数值。
+</p>
+
+<div class="chart-wrap">
+  <div data-craft-chart="new-users"
+       data-craft-chart-type="line"
+       data-craft-data="main"
+       data-craft-x="month"
+       data-craft-x-type="time"
+       data-craft-x-format="%Y-%m"
+       data-craft-x-label="月份"
+       data-craft-y="users"
+       data-craft-y-type="linear"
+       data-craft-y-label="新增用户（万人）"
+       data-craft-height="360"
+       data-craft-zoom="x"
+       data-craft-title="月度新增用户"
+       data-craft-caption="数据来源：示意数据，非真实业务数据"></div>
+
+  <p class="craft-caption">
+    <strong>示意数据</strong> —— 用于演示，不代表任何真实业务。
+  </p>
+</div>
+
+<!-- chart 类型不需要写任何 JS：上面的 data-* 属性会被 Craft.boot() 自动挂载。
+     只有在需要自定义 mark 时才用 SCRIPT_SLOT + render(ctx)。 -->
+
+
+<!-- ═══════════ 替换 DATA_SLOT ═══════════ -->
+
+<script type="application/json" data-craft-data="main">
+{
+  "rows": [
+    { "month": "2025-01-01", "users": 12.4 },
+    { "month": "2025-02-01", "users": 11.2 },
+    { "month": "2025-03-01", "users": 14.8 },
+    { "month": "2025-04-01", "users": 15.1 },
+    { "month": "2025-05-01", "users": 16.7 },
+    { "month": "2025-06-01", "users": 18.3 }
+  ]
+}
+</script>
+
+
+<!-- ═══════════ 替换 SCRIPT_SLOT ═══════════ -->
+
+<!-- 留空：chart 走全声明式路径，一行 JS 都不需要。 -->
