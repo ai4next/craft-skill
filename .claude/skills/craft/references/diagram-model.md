@@ -15,7 +15,7 @@
 | 属性 | 必需 | 说明 |
 |---|---|---|
 | `data-craft-diagram` | ✅ | 子类型：`architecture`\|`workflow`\|`sequence`\|`dataflow`\|`lifecycle`\|`freeform` |
-| `data-craft-model` | | 模型块的 key，默认 `main`。不写则退回属性写法 |
+| `data-craft-model` | ✅（用 JSON 模型块时） | 模型块的 key。**没有默认值** —— 不写就直接退回属性写法，JSON 块被忽略、节点数为 0 |
 | `data-craft-diagram-label` | | 图的用途，进 `aria-label`。缺了会告警 |
 
 模型放在 `<script type="application/json" data-craft-data="main">` 里。
@@ -34,11 +34,11 @@
 | 字段 | 必需 | 说明 |
 |---|---|---|
 | `kind` | ✅ | 子类型，与 `data-craft-diagram` 一致 |
-| `direction` | | `TB`(默认) \| `LR` \| `BT` \| `RL`，只对 `architecture`/`workflow`/`freeform` 生效 |
+| `direction` | | `TB`(默认) \| `LR` \| `BT` \| `RL`。**只有 `architecture` 读它** —— 其余子类型朝向固定：`workflow`/`dataflow` 横排，`sequence`/`lifecycle` 竖排，`freeform` 由坐标决定 |
 | `title` / `subtitle` | | 标题与副标题 |
 | `viewBox` | | **不要用**。这是裁剪框，不是自适应 |
-| `nodes[]` | ✅ | 见下 |
-| `edges[]` | | 见下 |
+| `nodes[]` | ✅（`architecture`/`dataflow`/`freeform`） | 见下。其余子类型用各自的字段名，见第三节 |
+| `edges[]` | | 见下。`sequence` 用 `messages`、`lifecycle` 用 `transitions`、`dataflow` 用 `flows` |
 | `groups[]` | | `{id, label}`，节点用 `group` 字段归属 |
 | `views[]` | | 最多 5 个 `{id, label, focus:[节点id], note}`，导览章节 |
 
@@ -51,11 +51,12 @@
 | `sublabel` | | ≤ 24 字 |
 | `kind` | | 见各子类型；决定配色 |
 | `group` | | 分组 id |
-| `order` | | 同层内的排序权重，平局时用 |
-| `rank` | | 强制指定层级（`architecture`/`workflow`/`dataflow`） |
+| `order` | | 同层内的排序权重，平局时用。**只有 `architecture` 读它** |
+| `rank` | | 强制指定层级。**只有 `architecture` 读它** |
 | `pos` | | **只有 `freeform` 用**。其他子类型给了也会被忽略 |
+| `size` | | `[w, h]`。**只有 `freeform` 用**，配合 `pos` 指定框尺寸 |
 
-**没有 `width` / `height` / `size`** —— 框的大小由标签内容算出来。
+**没有 `width` / `height`** —— 框的大小由标签内容算出来（`freeform` 可用 `size` 覆盖）。
 
 ### `edges[]`
 
@@ -110,6 +111,20 @@
 
 **消息不写 `y`** —— 顺序即时间顺序，纵坐标由运行时累加。
 列间距按最长标签算，不需要 `column_fit` 之类的修复开关。
+
+用 `blocks[]` 框住一段消息，表达 `opt` / `loop` / `alt`：
+
+```json
+"blocks": [ { "from": 1, "to": 3, "kind": "loop", "label": "重试 3 次" } ]
+```
+
+| 字段 | 必需 | 说明 |
+|---|---|---|
+| `from` / `to` | ✅ | `messages[]` 的下标，闭区间。越界报 `model/block-range` |
+| `kind` | | `opt`(默认) \| `loop` \| `alt`，只影响标签文字 |
+| `label` | | 框上的文字，缺省用 `kind` |
+
+框的左右边界由区间内涉及到的参与者自动算，`y` 由消息位置推 —— 同样不用你写坐标。
 
 ### `dataflow` —— ETL、血缘、管道
 
@@ -194,7 +209,7 @@
 | 适应窗口 | `0` | 复位 |
 | 导览章节 | `[` / `]` / rail 按钮 | 按 `views[]` 逐章聚焦 |
 | 演示模式 | `f` | 收起外壳，把舞台让给图 |
-| 导出 | 工具栏 `⤓` | PNG（2×，自动避开 16MiB 画布上限）与 SVG（自包含、可再主题化） |
+| 导出 | 工具栏 `⤓` | PNG（2×，自动避开 16MiB 画布上限）。**工具栏没有 SVG 按钮** —— SVG 走 `Craft.export.svg(inst)`，产物自包含、可再主题化 |
 | 缩略图 | — | 右下角，点击可跳转 |
 | 帮助 | `?` | 快捷键速查 |
 

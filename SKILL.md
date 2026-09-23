@@ -43,7 +43,7 @@ metadata:
 | 需要交互模式 | `references/interaction-patterns.md` —— 交互模式库 |
 | 用户指定了品牌色/视觉风格 | `references/design-system.md` —— 令牌体系与配色规范 |
 
-再加**一个**对应类型的 `examples/<类型>/skeleton.html`（小文件，~6KB）。
+再加**一个**对应类型的 `examples/<类型>/skeleton.html`（小文件，2–6KB）。
 
 **第一个候选落地之前，不要读 `assets/template.html` 里的运行时源码。** 只有遇到无法解释的内部诊断、或两轮定向修复都失败时，才去翻实现。
 
@@ -72,7 +72,10 @@ metadata:
 | `freeform` | 作者自己给坐标的自由图解 |
 
 **几何全部由运行时算**：分层、排序、坐标、正交路由、端口分配、标签避让、分组框。
-你写的是 `{nodes, edges, groups}`，模型里**没有坐标字段**。
+你写的是拓扑 —— `architecture` 写 `{nodes, edges, groups}`，其余子类型用各自的字段名
+（`sequence` 用 `participants`/`messages`，`lifecycle` 用 `phases`/`events`/`transitions`，
+`workflow` 用 `lanes`/`steps`，`dataflow` 用 `stages`/`nodes`/`flows`，见 `diagram-model.md`）。
+模型里**没有坐标字段**（`freeform` 的 `pos` 是唯一例外）。
 
 路由器对构图质量有硬保证，不需要你操心：**规避边-边交叉**、**规避通道共线重叠**、
 **拒绝微段与过短折角**、**单边端口溢出自动改走次优朝向**（作者显式写的
@@ -80,7 +83,8 @@ metadata:
 而 `degradedRoutes` 必须为 0 —— 这是 `check.mjs` 的 error。
 
 **读者交互也全部现成**，不需要你写：搜索（`/`）、点节点看上下游、路径探查、缩放平移、
-导览章节、演示模式（`f`）、缩略图、导出 PNG/SVG、深链（`#focus=` / `#view=` / `#route=`）。
+导览章节、演示模式（`f`）、缩略图、导出 PNG（工具栏 `⤓`；SVG 走 `Craft.export.svg`）、
+深链（`#focus=` / `#view=` / `#route=`）。
 
 各子类型的关键差异：
 

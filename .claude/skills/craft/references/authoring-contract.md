@@ -88,7 +88,7 @@
 | `data-craft-data` | ✅ | 数据块 key，默认 `main` |
 | `data-craft-x` / `data-craft-y` | ✅（`custom` 除外） | 字段名 |
 | `data-craft-series` | | 用于拆系列的字段名 |
-| `data-craft-color` | | `series`\|`categorical`\|`sequential`\|`diverging` |
+| `data-craft-color` | | `categorical`(默认)\|`sequential`\|`diverging` |
 | `data-craft-x-type` / `-y-type` | | `linear`\|`log`\|`time`\|`band`；缺省自动推断 |
 | `data-craft-height` | | 像素，默认 `360` |
 | `data-craft-legend` | | `auto`(默认)\|`none` |
@@ -129,7 +129,7 @@
 | 属性 | 必需 | 含义 |
 |---|---|---|
 | `data-craft-diagram` | ✅ | 子类型：`architecture`\|`workflow`\|`sequence`\|`dataflow`\|`lifecycle`\|`freeform` |
-| `data-craft-model` | | 模型块的 key，默认 `main` |
+| `data-craft-model` | ✅（用 JSON 模型块时） | 模型块的 key。**没有默认值** —— 不写就直接退回属性写法，JSON 块被忽略、节点数为 0 |
 | `data-craft-diagram-label` | | 图的用途，进 `aria-label` |
 
 模型放在 `<script type="application/json" data-craft-data="main">` 里。
@@ -173,7 +173,7 @@
 const x = Craft.scale.linear({domain: [0, 100], range: [0, 600], nice: true});
 x(50); x.invert(300); x.ticks(5);
 Craft.scale.band({domain: ['A','B'], range: [0,600], padding: 0.2}).bandwidth();
-Craft.scale.time({domain: [t0, t1], range: [0, 600], ticks: 'month'});
+Craft.scale.time({domain: [t0, t1], range: [0, 600]});   // 刻度数由 f.ticks(n) 定，没有 ticks 选项
 
 // 轴 —— 绝不手写刻度
 Craft.axis.render(g, x, {orient: 'bottom', ticks: 6, label: '日期'});
@@ -206,6 +206,8 @@ const sim = Craft.bind('#controls', {
   state: {rate: 0.08, horizon: 30},
   onChange: (state) => draw(state)
 });
+draw(sim.state);   // ← 必须自己画一次：onChange 只在读者动控件时才触发，
+                   //   不补这一句首屏就是空的 —— 而默认状态必须自解释
 
 // 分步叙事
 Craft.step('#story', {rail: '#step-rail', onStep: (i) => view.show(i)});
@@ -330,10 +332,10 @@ inst.stats.degradedRoutes;                    // 路由器自己承认失败的�
 | `layout/no-edge-through-node` | 边穿过无关节点 | 减少跨层连接 |
 | `layout/no-label-collision` | 两个标签互相压叠 | 缩短标签、减少带标签的边 |
 | `layout/label-masked` | 标签找不到无冲突位置，已降级为带底色的遮挡态 | 缩短标签、减少同区域边、加分组 |
-| `layout/corridor-shared` | 两条无关边在同一条通道上共线重叠（warning） | 减少同向的平行边、加分组、调 `nodes[].order` |
+| `layout/corridor-shared` | 两条无关边在同一条通道上共线重叠（warning） | 减少同向的平行边、加分组；`architecture` 还可以调 `nodes[].order` |
 | `layout/route-rhythm` | 边有微段（<8px）或过短的折角（warning） | 减少跨层连接、缩短标签 |
 | `layout/degraded-route` | 有边没找到合规路由 | 减少跨层连接、缩短标签、加分组 |
-| `layout/crossing-budget` | 交叉过多（分层交叉与路由交叉取较大值） | 用 `nodes[].order` 调顺序，或拆图 |
+| `layout/crossing-budget` | 交叉过多（分层交叉与路由交叉取较大值） | 拆图，或加分组把相关节点拉近；`architecture` 还可以用 `nodes[].order` 调顺序 |
 | `layout/deterministic` | 两次布局不一致 | 检查是否引入随机或依赖对象键序 |
 | `layout/runtime-missing` | 有图解模型却没有可执行的运行时 | 确认 `data-craft-owned` 区块还在，重新生成产物 |
 | `layout/sandbox-failed` | 布局引擎在 Node 沙箱里执行失败 | 确认 `data-craft-owned` 区块没被手改 |
@@ -352,7 +354,7 @@ inst.stats.degradedRoutes;                    // 路由器自己承认失败的�
 
 ### 仓库一致性（mirror / docs）
 
-只在 `--mirror` 下检查 —— 这两条是给技能维护者看的，不是产物的问题。
+只在 `--mirror` 下检查 —— 这三条是给技能维护者看的，不是产物的问题。
 
 | 诊断 code | 含义 | 怎么修 |
 |---|---|---|

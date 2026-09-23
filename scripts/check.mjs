@@ -101,12 +101,21 @@ function snippetAt(src, index, width = 88) {
 
 /* ── 区域切分 ─────────────────────────────────────────── */
 
+/** 把 HTML 注释的内容换成**等长**空白：偏移量全部保留，所以按 index 回原文取切片仍然正确。
+    不做这一步的话，注释里出现的 <script>/<style> 示例会被当成真的区块 ——
+    契约要求「没内容可填就删掉整个注释」，作者把数据块注释掉是很自然的动作，
+    而误报出来的 data/json-invalid 会指着一条注释说「JSON 解析失败」。 */
+function maskComments(src) {
+  return src.replace(/<!--[\s\S]*?(?:-->|$)/g, m => ' '.repeat(m.length));
+}
+
 /** 把文档切成 owned（模板自带）／json（数据块）／author（作者写的）三类区块。 */
 function splitRegions(src) {
   const regions = [];
+  const scan = maskComments(src);
   const re = /<(style|script)\b([^>]*)>([\s\S]*?)<\/\1\s*>/gi;
   let m;
-  while ((m = re.exec(src))) {
+  while ((m = re.exec(scan))) {
     const [full, tag, attrs] = m;
     const bodyStart = m.index + full.indexOf('>') + 1;
     const bodyEnd = m.index + full.length - (`</${tag}>`.length);
@@ -125,11 +134,21 @@ function splitRegions(src) {
 }
 
 /** 只取作者写的片段（排除模板自带的 data-craft-owned 运行时块）。
-    有些规则必须只看作者写了什么 —— 运行时的文档注释里就写着
-    `<div data-craft-chart="x" ...>` 这样的示例，整篇扫描会把注释当成真的图表声明，
-    于是任何没有 main 数据块的产物都会被误报 contract/chart-fields。 */
+    两件事必须同时成立，缺一个就会误报：
+
+    1. 不能扫模板区 —— 运行时的文档注释里就写着
+       `<div data-craft-chart="x" ...>` 这样的示例，整篇扫描会把注释当成真的图表声明，
+       于是任何没有 main 数据块的产物都会被误报 contract/chart-fields。
+    2. 不能扫注释 —— 作者临时把一块内容注释掉是很自然的动作。
+       只做第 1 条的话，注释掉的图表容器仍会被当成真的图表去校验，
+       报出来的 contract/chart-fields 会指着一条注释说话。
+
+    maskComments 保持等长，所以 start/end 偏移仍然对得上原文。 */
 function authorSegments(src, regions) {
-  return complementOf(src, regions, ['owned']);
+  const masked = maskComments(src);
+  return complementOf(src, regions, ['owned']).map(s => ({
+    start: s.start, end: s.end, text: masked.slice(s.start, s.end)
+  }));
 }
 
 /** 取某些类别区块之外的全部文本片段。 */
@@ -799,7 +818,7 @@ function diagramContainers(src) {
   const out = [];
   const re = /<[a-zA-Z][^>]*\bdata-craft-diagram\s*=\s*["']([^"']*)["'][^>]*>/gi;
   let m;
-  while ((m = re.exec(src))) {
+  while ((m = re.exec(maskComments(src)))) {
     const tag = m[0];
     out.push({
       index: m.index,
@@ -1436,7 +1455,7 @@ function receiptPath(file) { return file + '.receipt.json'; }
 
 /** 产物里所有 JSON 模型块的联合哈希 —— 模型变了但产物字节没变的情况也要能发现 */
 function modelHash(src) {
-  const parts = [...src.matchAll(
+  const parts = [...maskComments(src).matchAll(
     /<script[^>]*type="application\/json"[^>]*data-craft-data="([^"]*)"[^>]*>([\s\S]*?)<\/script>/g
   )].map(m => m[1] + '\u0000' + m[2]);
   return parts.length ? sha256(parts.join('\u0001')) : null;

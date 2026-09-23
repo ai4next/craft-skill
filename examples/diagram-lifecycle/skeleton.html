@@ -47,15 +47,16 @@
   "phases": [
     { "id": "p1", "label": "待处理" },
     { "id": "p2", "label": "处理中" },
-    { "id": "p3", "label": "终态" }
+    { "id": "p3", "label": "异常" },
+    { "id": "p4", "label": "终态" }
   ],
   "events": [
     { "id": "queued", "label": "排队", "phase": "p1", "type": "normal" },
     { "id": "running", "label": "执行中", "phase": "p2", "type": "normal" },
-    { "id": "failed", "label": "失败", "phase": "p2", "type": "failure" }
+    { "id": "failed", "label": "失败", "phase": "p3", "type": "failure" }
   ],
   "outcomes": [
-    { "id": "done", "label": "已完成", "phase": "p3" }
+    { "id": "done", "label": "已完成", "phase": "p4" }
   ],
   "transitions": [
     { "from": "queued", "to": "running", "label": "开始" },

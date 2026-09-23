@@ -1,0 +1,128 @@
+<!--
+  simulation 类型的最小骨架 —— 这是「往 assets/template.html 的四个哨兵槽里写什么」的示范。
+
+  不要单独打开这个文件。用法：复制 assets/template.html，把下面四段分别替换掉
+  对应的哨兵注释。读完这个文件就够了，不需要再去读 template.html 的运行时源码。
+
+  这个骨架只有一个参数、一条曲线、一个读数。先让它通过 check.mjs，
+  再加第二个参数、相位图、状态读数。建模的三个常见错误见 references/explainer-craft.md。
+-->
+
+
+<!-- ═══════════ 替换 HEAD_SLOT ═══════════ -->
+
+<title>半衰期：衰减有多快</title>
+<meta name="description" content="一个可探索模拟：半衰期如何决定衰减速度">
+
+<style>
+  /* 页面专属样式。颜色一律用 --craft-* 令牌，不要写死。 */
+  .sim-readout { margin-top: var(--craft-sp-4); color: var(--craft-muted); }
+</style>
+
+
+<!-- ═══════════ 替换 BODY_SLOT ═══════════ -->
+
+<h1>半衰期：衰减有多快</h1>
+
+<p class="craft-lede">
+  半衰期是「剩一半」需要的时间。直觉上它只描述速度，
+  但它同时决定了一件更实用的事：<strong>要多久才降到可以忽略</strong>。
+  拖动右边的滑杆，看这两个数字怎么一起变。
+</p>
+
+<div data-craft-sim="decay" data-craft-frame="manual">
+
+  <div id="decay-chart"></div>
+
+  <div class="craft-fields">
+    <div class="craft-field">
+      <label for="half-life">半衰期（年）</label>
+      <input id="half-life" type="range" min="1" max="30" step="1" value="5"
+             data-craft-control="halfLife">
+      <output data-craft-output="halfLife" data-craft-format="number"></output>
+    </div>
+    <button class="craft-btn" type="button" data-craft-sim-reset>重置</button>
+  </div>
+
+  <p class="sim-readout" id="readout" aria-live="polite"></p>
+</div>
+
+<section class="craft-prose">
+  <h2>这张图在说什么</h2>
+  <p>
+    纵轴是「还剩多少」，横轴是年数。每过 <strong>一个半衰期</strong>，
+    剩下的量就乘一次 0.5 —— 所以曲线永远在下降，但永远到不了零。
+  </p>
+  <p>
+    注意读数里的两个数字是<strong>同比例</strong>变化的：
+    半衰期翻倍，降到 1% 的时间也翻倍。衰减的「形状」和半衰期无关，
+    半衰期只负责把整条曲线拉长或压短。
+  </p>
+</section>
+
+<p class="craft-caption">
+  <strong>模型推算</strong> —— 按 <code>0.5^(t / 半衰期)</code> 直接算出，
+  没有随机成分：同样的参数必然得到同样的曲线。
+</p>
+
+
+<!-- ═══════════ 替换 DATA_SLOT ═══════════ -->
+
+<!-- 这个骨架没有数据块：曲线由 simulate(state) 按参数算出，没有固定数据集。
+     要放初始数据就在本段写一个 data-craft-data="main" 的 JSON 块，
+     否则把本段整体删掉 —— 残留哨兵会被 artifact/sentinel-unfilled 拦下。 -->
+
+
+<!-- ═══════════ 替换 SCRIPT_SLOT ═══════════ -->
+
+<script>
+/* simulation 的页面逻辑。
+
+   一条纪律：模型必须是**纯函数** simulate(state) —— 同样的 state 必然得到同样的序列。
+   不要用 Math.random，也不要把上一次的结果攒进数组里接着算。 */
+
+(function () {
+  'use strict';
+
+  var HORIZON = 120;      // 横轴最长画到 120 年
+  var STEP = 1;           // 采样步长（年）
+
+  /* 纯函数：参数进，数据出。没有任何隐藏状态。 */
+  function simulate(state) {
+    var halfLife = Math.max(0.5, state.halfLife);
+    var rows = [];
+    for (var t = 0; t <= HORIZON; t += STEP) {
+      rows.push({ year: t, left: Math.pow(0.5, t / halfLife) });
+    }
+    return rows;
+  }
+
+  Craft.sim.define('decay', {
+    state: { halfLife: 5 },
+
+    draw: function (ctx) {
+      var sim = ctx.sim;
+      var rows = simulate(ctx.state);
+
+      /* 第一次画要挂载，之后只更新数据 —— 每次都 mount 会叠出一堆 SVG */
+      if (!sim.chart) {
+        sim.chart = Craft.chart.mount('#decay-chart', {
+          height: 300,
+          data: rows,
+          x: { field: 'year', type: 'linear', label: '年' },
+          y: { field: 'left', type: 'linear', label: '剩余比例', grid: true },
+          render: Craft.marks.line
+        });
+      } else {
+        sim.chart.update(rows);
+      }
+
+      /* 降到 1% 需要几个半衰期？0.5^n = 0.01 → n = log2(100)，与半衰期成正比 */
+      var toOnePercent = ctx.state.halfLife * Math.log2(100);
+      document.getElementById('readout').innerHTML =
+        '半衰期 ' + ctx.state.halfLife + ' 年 → 降到 1% 需要 <strong>' +
+        toOnePercent.toFixed(0) + ' 年</strong>。';
+    }
+  });
+})();
+</script>

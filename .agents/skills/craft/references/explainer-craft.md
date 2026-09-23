@@ -137,7 +137,7 @@ Craft.sim.define('sir', {
 - `Craft.step` 给每步标题加 `tabindex="-1"`，↑↓ / PgUp/PgDn / Home/End 在故事内可翻步。
 - rail（`data-craft-rail`）渲染成 `<button>`，带「第 3 步，共 7 步：标题」的 `aria-label`，整个叙事不用滚动也能走完。
 - **焦点在故事之外时，方向键不会被劫持** —— 这是有意为之，别去改。
-- `?step=N` 深链与 `#step=N` 便于分享特定步骤。
+- `#step=N` 深链便于分享特定步骤（**只有 hash 形式**，`?step=N` 不生效；查询串里只有 `?theme=` 与 `?present=1`）。
 
 你要做的：
 

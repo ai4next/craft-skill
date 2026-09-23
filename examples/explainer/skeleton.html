@@ -1,0 +1,156 @@
+<!--
+  explainer 类型的最小骨架 —— 这是「往 assets/template.html 的四个哨兵槽里写什么」的示范。
+
+  不要单独打开这个文件。用法：复制 assets/template.html，把下面四段分别替换掉
+  对应的哨兵注释。读完这个文件就够了，不需要再去读 template.html 的运行时源码。
+
+  这个骨架只有三段叙事、一个控件、一张图。先让它通过 check.mjs，
+  再加第四步、第二个控件、说明卡片。叙事结构见 references/explainer-craft.md。
+-->
+
+
+<!-- ═══════════ 替换 HEAD_SLOT ═══════════ -->
+
+<title>涨了又跌，为什么回不去</title>
+<meta name="description" content="一个可探索解释：为什么同样的百分比，涨和跌不对称">
+
+<style>
+  /* 页面专属样式。颜色一律用 --craft-* 令牌，不要写死。 */
+  .explain-grid { display: grid; gap: var(--craft-sp-6); margin-top: var(--craft-sp-5); }
+  @media (min-width: 900px) {
+    .explain-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 20rem); align-items: start; }
+  }
+  .explain-panel { position: sticky; top: var(--craft-sp-4); }
+  .explain-readout { margin-top: var(--craft-sp-4); color: var(--craft-muted); }
+</style>
+
+
+<!-- ═══════════ 替换 BODY_SLOT ═══════════ -->
+
+<h1>涨了又跌，为什么回不去</h1>
+
+<p class="craft-lede">
+  一只股票先涨 20%，再跌 20%。它回到原价了吗？没有 —— 100 元变成 96 元。
+  百分比一模一样，凭什么少了 4 元？拖动右边的滑杆看看这个口子能张多大。
+</p>
+
+<nav data-craft-rail aria-label="讲解步骤"></nav>
+
+<div class="explain-grid">
+
+  <div id="story">
+
+    <section data-craft-step="0" data-craft-step-title="钩子">
+      <h2>先猜一个数</h2>
+      <p>100 元先涨 20%，再跌 20%，最后是多少？</p>
+      <p>多数人会说「还是 100」。实际是 <strong>96 元</strong> —— 凭空少了 4 元。</p>
+      <p>涨和跌的百分比完全一样，凭什么结果不一样？</p>
+    </section>
+
+    <section data-craft-step="1" data-craft-step-title="直觉">
+      <h2>百分比没有固定的「原点」</h2>
+      <p>涨 20% 是按 <strong>100</strong> 算的，跌 20% 是按 <strong>120</strong> 算的。</p>
+      <p>
+        同一个 20%，乘的基数不一样，绝对值就不一样。基数被抬高了，
+        同样的百分比就变得更「贵」。
+      </p>
+      <p>
+        右边的图里，中间那根是涨完的价格，右边那根是跌完的价格。
+        把滑杆拖到 50%，看这两根柱子差多远。
+      </p>
+    </section>
+
+    <section data-craft-step="2" data-craft-step-title="应用">
+      <h2>能拿它做什么判断</h2>
+      <p>跌掉一半，要涨回一倍才能回本 —— 因为涨的时候，基数已经小了。</p>
+      <p>
+        由此可以推出：<strong>亏损和盈利不对称</strong>，而且亏损越深，不对称越严重。
+        这正是「控制回撤」比「追求高收益」更要紧的原因。
+      </p>
+    </section>
+
+  </div>
+
+  <div class="explain-panel">
+    <div id="chart"></div>
+
+    <div class="craft-fields" id="controls">
+      <div class="craft-field">
+        <label for="pct">涨跌幅（%）</label>
+        <input id="pct" type="range" min="5" max="50" step="5" value="20"
+               data-craft-control="pct">
+        <output data-craft-output="pct" data-craft-format="number"></output>
+      </div>
+      <button class="craft-btn" type="button" data-craft-reset>重置</button>
+    </div>
+
+    <p class="explain-readout" id="readout" aria-live="polite"></p>
+
+    <p class="craft-caption">
+      <strong>模型推算</strong> —— 按百分比连乘直接算出，不是真实行情数据，
+      也不构成任何投资建议。
+    </p>
+  </div>
+
+</div>
+
+
+<!-- ═══════════ 替换 DATA_SLOT ═══════════ -->
+
+<script type="application/json" data-craft-data="main">
+{
+  "rows": [
+    { "stage": "原价", "price": 100 },
+    { "stage": "涨 20%", "price": 120 },
+    { "stage": "跌 20%", "price": 96 }
+  ]
+}
+</script>
+
+
+<!-- ═══════════ 替换 SCRIPT_SLOT ═══════════ -->
+
+<script>
+/* explainer 的页面逻辑。
+
+   两件事：把控件绑到 state（不写事件监听），把 state 变成图上的数据。
+   换参数就重画 —— 读者自己操作、自己得出结论，而不是读一句结论。 */
+
+Craft.ready(function () {
+  var chart = Craft.chart.mount('#chart', {
+    height: 280,
+    data: Craft.data.rows('main'),
+    x: { field: 'stage', type: 'band', label: '阶段' },
+    y: { field: 'price', type: 'linear', label: '价格（元）', grid: true },
+    render: Craft.marks.bar
+  });
+
+  function series(pct) {
+    var p = pct / 100;
+    var up = 100 * (1 + p);
+    return [
+      { stage: '原价', price: 100 },
+      { stage: '涨 ' + pct + '%', price: Math.round(up * 10) / 10 },
+      { stage: '跌 ' + pct + '%', price: Math.round(up * (1 - p) * 10) / 10 }
+    ];
+  }
+
+  function draw(state) {
+    var rows = series(state.pct);
+    chart.update(rows);
+    var lost = 100 - rows[2].price;
+    document.getElementById('readout').innerHTML =
+      '涨跌各 ' + state.pct + '% 之后，价格是 <strong>' +
+      rows[2].price.toFixed(1) + ' 元</strong>，比原价少 ' + lost.toFixed(1) + ' 元。';
+  }
+
+  var controls = Craft.bind('#controls', {
+    state: { pct: 20 },
+    onChange: draw
+  });
+
+  /* onChange 只在读者动控件时才触发。首屏必须自己画一次，
+     否则默认状态下图是空的、读数是空的 —— 而默认状态必须自解释。 */
+  draw(controls.state);
+});
+</script>

@@ -113,6 +113,56 @@ test('干净的示例不得报出任何 error（夹具本身没有误伤基线�
   assert.equal(report.summary.errors, 0);
 });
 
+test('注释掉的数据块不算数据块 —— 不得误报 data/json-invalid', () => {
+  /* 契约要求「没内容可填就删掉整个注释」，作者临时注释掉数据块也很自然。
+     按原文扫描会把注释里的 <script> 当成真的区块，于是报出指着注释的
+     data/json-invalid、外加一条把注释算进去的 data/size —— 全是假警报。
+     正确行为是：认不出数据块，于是报「图表引用了不存在的数据块」。 */
+  const html = readExample('chart').replace(
+    /(<script type="application\/json" data-craft-data="main">[\s\S]*?<\/script>)/,
+    m => `<!-- ${m} -->`
+  );
+  const { codes } = checkMutated(html, 'commented-datablock');
+  assert.ok(
+    !codes.includes('data/json-invalid'),
+    `注释里的数据块被当成了真数据块：[${[...new Set(codes)].join(', ')}]`
+  );
+});
+
+test('注释掉的图表容器不算图表 —— 不得指着注释报字段缺失', () => {
+  /* 与上一条同源：作者把一整块图表注释掉是很自然的动作。
+     只屏蔽数据块的注释是不够的 —— 作者区里的注释同样不能被当成活的声明。 */
+  const base = readExample('chart');
+
+  /* 只注释作者区的图表容器：运行时的文档注释里也写着 data-craft-chart 的示例，
+     注释掉它会破坏 owned 区块，那是另一个诊断要管的事。
+     注意不能简单地按第一个 <script data-craft-owned> 切 —— head 里还有一个。 */
+  const owned = [...base.matchAll(/<script data-craft-owned>[\s\S]*?<\/script>/g)]
+    .map(m => [m.index, m.index + m[0].length]);
+  const inOwned = (i) => owned.some(([a, b]) => i >= a && i < b);
+
+  const commented = base.replace(
+    /(<div data-craft-chart=[\s\S]*?><\/div>)/g,
+    (m, _g, off) => (inOwned(off) ? m : `<!-- ${m} -->`)
+  );
+  assert.notEqual(commented, base, '夹具没有生效：一个图表容器都没注释掉');
+
+  const bad = m => { m.rows.forEach(r => { delete r.users; }); };
+  const off = checkMutated(mutateModel(commented, bad), 'chart-commented');
+  const on = checkMutated(mutateModel(base, bad), 'chart-live');
+
+  assert.ok(
+    !off.codes.includes('contract/chart-fields'),
+    `注释掉的图表仍被校验：[${[...new Set(off.codes)].join(', ')}]`
+  );
+  /* 正对照：图表没被注释时，同样的坏数据必须仍然报出来 ——
+     否则「修好」只是把规则整个关掉了。 */
+  assert.ok(
+    on.codes.includes('contract/chart-fields'),
+    `图表正常时反而没报字段缺失：[${[...new Set(on.codes)].join(', ')}]`
+  );
+});
+
 test('确定性：同一模型两次布局逐字节相同', () => {
   /* layout/deterministic 规则会自己跑两次比对。这里断言它不触发，
      等于断言布局没有引入随机或对象键序依赖。 */

@@ -70,7 +70,7 @@ craft 的 `diagram` 有六个子类型 —— `architecture` / `workflow` / `seq
 | `data-craft-node-pos` | **只有 `freeform` 用**（`x,y`）；其他子类型给了也会被忽略 |
 | `data-craft-edge="a->b"` | 有向边，两端是节点 id |
 | `data-craft-edge-label` | 边标签（≤ 12 字） |
-| `data-craft-edge-kind` | `flow`（流程）／`relation`（关系）／`sequence`（时序，虚线） |
+| `data-craft-edge-kind` | **只有 `return` 有效果** —— 画成虚线，表示返回消息。其余取值不影响渲染 |
 
 **不要手写 `<rect>` / `<text>` / 任何坐标** —— 框尺寸由标签算出来，节点元素由运行时生成。
 你自己画的那份会被忽略，或者和运行时生成的重叠。
@@ -100,7 +100,7 @@ document.querySelector('[data-craft-diagram]')
 |---|---|
 | **用于** | 补充细节，不打断阅读 |
 | **不要用于** | 承载理解所必需的信息 —— 触屏没有 hover |
-| **实现** | 给元素加 `data-craft-mark`（图表）或 `data-craft-node`（图解），运行时自动接上悬停 + 键盘焦点 |
+| **实现** | 图表：给元素加 `data-craft-mark`。图解：**什么都不用做** —— 悬停与键盘焦点已经接在运行时生成的节点上 |
 | **注意** | 触屏和键盘用户拿不到 hover，所以关键信息必须有非悬停的获取路径（a11y 数据表、详情面板） |
 
 ### 点击选中 / 高亮

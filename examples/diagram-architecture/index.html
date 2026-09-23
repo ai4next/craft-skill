@@ -1364,6 +1364,9 @@ var fmt = Craft.fmt = {
       var p = pattern || '%m-%d';
       return function (v) { return fmt.date(v, p); };
     }
+    /* band 的刻度是类别标签，不是数值。套数字格式化会把「涨 20%」里的 20
+       抠出来当刻度 —— 标签直接变形，而且不报任何错。 */
+    if (type === 'band') return function (v) { return v == null ? '' : String(v); };
     return function (v) {
       var n = util.num(v);
       if (!isFinite(n)) return String(v);
@@ -3993,7 +3996,7 @@ route.assertScene = function (scene) {
       code: 'layout/corridor-shared', severity: 'warning',
       subject: corridor.slice(0, 4).join('；'),
       message: corridor.length + ' 处边在同一条通道上共线重叠，会糊成一条线',
-      fixes: ['减少同向的平行边', '给节点加分组让它们靠近', '调整 nodes[].order']
+      fixes: ['减少同向的平行边', '给节点加分组让它们靠近', '调整 nodes[].order（仅 architecture）']
     });
   }
 

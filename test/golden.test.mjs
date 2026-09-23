@@ -13,7 +13,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { ROOT, EXAMPLES, runCheck } from './helpers.mjs';
+import { ROOT, EXAMPLES, runCheck, checkMutated, assembleSkeleton } from './helpers.mjs';
 
 const types = fs.readdirSync(EXAMPLES, { withFileTypes: true })
   .filter(e => e.isDirectory() && fs.existsSync(path.join(EXAMPLES, e.name, 'index.html')))
@@ -35,6 +35,27 @@ for (const type of types) {
       errs.map(d => `  ${d.code} — ${d.message}`).join('\n')
     );
     assert.equal(status, 0, `${type}: 退出码应为 0，实际 ${status}`);
+  });
+
+  /* SKILL.md 的快速路径要求「读对应类型的 skeleton.html」——
+     少了它，那条路径对这类产物就是死胡同。以前 explainer/simulation 就没有。 */
+  test(`示例 ${type} 必须有 skeleton.html`, () => {
+    const p = path.join(EXAMPLES, type, 'skeleton.html');
+    assert.ok(fs.existsSync(p), `${type} 缺 skeleton.html —— SKILL.md 的快速路径会指向一个不存在的文件`);
+  });
+
+  /* 骨架是模型照抄的模板，坏掉的骨架比没有骨架更糟：它会把错误示范复制到每一份产物里。
+     所以骨架必须自己先过门禁 —— 组装成完整产物再跑 check.mjs。 */
+  test(`示例 ${type} 的 skeleton.html 组装后必须 0 error`, () => {
+    const { status, report } = checkMutated(assembleSkeleton(type), `skeleton-${type}`);
+    assert.ok(report, `${type}/skeleton.html: check.mjs 没有输出可解析的 JSON`);
+    const errs = (report.diagnostics || []).filter(d => d.severity === 'error');
+    assert.equal(
+      report.summary.errors, 0,
+      `${type}/skeleton.html 组装后有 ${report.summary.errors} 个 error：\n` +
+      errs.map(d => `  ${d.code} — ${d.message}`).join('\n')
+    );
+    assert.equal(status, 0, `${type}/skeleton.html: 退出码应为 0，实际 ${status}`);
   });
 }
 

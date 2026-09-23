@@ -60,7 +60,7 @@ node scripts/sync.mjs                              # 重新生成
 
 | 文件 | 覆盖 |
 |---|---|
-| `golden.test.mjs` | 每个示例 0 error；`--mirror` 一致；派生文件已同步 |
+| `golden.test.mjs` | 每个示例 0 error；`--mirror` 一致；派生文件已同步；每个示例都有 `skeleton.html` 且**组装后 0 error** |
 | `diagnostics.test.mjs` | **反向夹具**：故意做坏的产物必须报出预期诊断码（含严重度与退出码） |
 | `router.test.mjs` | 几何不变量：0 降级路由、0 遮挡标签、确定性、交叉规避确实有效、端口溢出 |
 | `mermaid.test.mjs` | 三种 Mermaid 输入的结构断言 + **端到端**（生成的模型必须过 check） |
